@@ -73,7 +73,7 @@ class SampleApp(Tk):
         
         self.legend_frame = LabelFrame(self.new_product_tab,text='Description',padx=250, pady=50)
         self.legend_frame.pack(side = tk.TOP, expand = False)
-        self.product_name_label = Label(self.legend_frame,text = "Product Name:                     ", font = ('Helvetica', 10))
+        self.product_name_label = Label(self.legend_frame,text = "Product Name: ", font = ('Helvetica', 10))
         self.product_name_label.grid(column=0, row=0, padx=0, pady=10)
         self.product_name_text = tk.Text(self.legend_frame,height = 2,width = 50)
         self.product_name_text.grid(column=1, row=0)
