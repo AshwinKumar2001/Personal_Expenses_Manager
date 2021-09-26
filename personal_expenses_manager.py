@@ -78,8 +78,10 @@ class SampleApp(Tk):
         self.product_name_text = tk.Text(self.legend_frame,height = 2,width = 50)
         self.product_name_text.grid(column=1, row=0)
         
-        self.product_type_label = Label(self.legend_frame,text = "Product Type: ", font = ('Helvetica', 10))
+        _type_label = Label(self.legend_frame,text = "Product Type: ", font = ('Helvetica', 10))
         self.product_type_label.grid(column=0, row=1, padx=0, pady=10)
+        self.product_type_text = tk.Text(self.legend_frame,height = 2,width = 50)
+        self.product_type_text.grid(column=1, row=1)
         self.date_of_purchase_label = Label(self.legend_frame,text = "Date of Purchase: ", font = ('Helvetica', 10))
         self.date_of_purchase_label.grid(column=0, row=2, padx=0, pady=10)
         self.price_of_product_label = Label(self.legend_frame,text = "Price of Product: ", font = ('Helvetica', 10))
