@@ -7,9 +7,10 @@ Created on Thu Aug 12 13:02:03 2021
 
 
 import tkinter as tk                # python 3
-from tkinter import font as tkfont 
+from tkinter import PhotoImage, font as tkfont 
 from tkinter import ttk# python 3
 from tkinter import Tk
+from tkinter import Button
 from tkinter import Label
 from tkinter import LabelFrame
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
@@ -72,9 +73,9 @@ class SampleApp(Tk):
         self.canvas.get_tk_widget().pack(side = tk.TOP, fill = tk.BOTH, expand = True)
         
         self.legend_frame = LabelFrame(self.new_product_tab,text='Description',padx=20, pady=30)
-        self.legend_frame.pack(side = tk.TOP, expand = False)
+        self.legend_frame.grid(columnspan=2,ipadx = 30)
         self.product_name_label = Label(self.legend_frame,text = "Product Name: ", font = ('Helvetica', 10))
-        self.product_name_label.grid(column=0, row=0, padx=0, pady=10)
+        self.product_name_label.grid(column=0, row=0, ipadx=0, ipady=10)
         self.product_name_text = tk.Text(self.legend_frame,height = 2,width = 50)
         self.product_name_text.grid(column=1, row=0)
         
@@ -84,16 +85,25 @@ class SampleApp(Tk):
         self.product_type_text.grid(column=1, row=1)
 
         self.date_of_purchase_label = Label(self.legend_frame,text = "Date of Purchase: ", font = ('Helvetica', 10))
-        self.date_of_purchase_label.grid(column=0, row=2, padx=0, pady=10)
+        self.date_of_purchase_label.grid(column=0, row=2, ipadx=0, ipady=10)
+        self.date_show_label = Label(self.legend_frame, text = "dd/mm/yyyy", font = ('Helvetica', 10),  relief="sunken")
+        self.date_show_label.grid(column =1, row = 2, ipadx= 162, ipady = 7)
+        self.calendar_button_image = PhotoImage(file = 'calendar.png')
+        self.calendar_button_image.subsample(6)
+        self.calendar_label= Label(image=self.calendar_button_image)
+        self.calendar_button = Button(self.legend_frame,image=self.calendar_button_image, borderwidth=0)
+        self.calendar_button.grid(column=2,row=2)
         self.price_of_product_label = Label(self.legend_frame,text = "Price of Product: ", font = ('Helvetica', 10))
-        self.price_of_product_label.grid(column=0, row=3, padx=0, pady=10)
+        self.price_of_product_label.grid(column=0, row=3, ipadx=0, ipady=10)
         
-        
-        #self.product_name_label.place(x =100, y = 100 )
+
         
         self.withdraw()
         self.tab_window.protocol("WM_DELETE_WINDOW",self.open_root)
 
+    def select_date(self):
+        self.calendar_window = tk.Toplevel(self.tab_window)
+        self.calendar = Calendar(self.calendar_window,)
         
     def open_root(self):
         self.deiconify()
