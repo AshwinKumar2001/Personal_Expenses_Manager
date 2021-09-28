@@ -13,6 +13,7 @@ from tkinter import Tk
 from tkinter import Button
 from tkinter import Label
 from tkinter import LabelFrame
+from tkcalendar import Calendar
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure 
 
@@ -91,7 +92,7 @@ class SampleApp(Tk):
         self.calendar_button_image = PhotoImage(file = 'calendar.png')
         self.calendar_button_image.subsample(6)
         self.calendar_label= Label(image=self.calendar_button_image)
-        self.calendar_button = Button(self.legend_frame,image=self.calendar_button_image, borderwidth=0)
+        self.calendar_button = Button(self.legend_frame,image=self.calendar_button_image, borderwidth=0, command = self.select_date)
         self.calendar_button.grid(column=2,row=2)
         self.price_of_product_label = Label(self.legend_frame,text = "Price of Product: ", font = ('Helvetica', 10))
         self.price_of_product_label.grid(column=0, row=3, ipadx=0, ipady=10)
@@ -103,7 +104,16 @@ class SampleApp(Tk):
 
     def select_date(self):
         self.calendar_window = tk.Toplevel(self.tab_window)
-        self.calendar = Calendar(self.calendar_window,)
+        self.calendar = Calendar(self.calendar_window,selectmode="day",year= 2021, month=1, day=1, date_pattern = 'dd/mm/y')
+        self.calendar.pack(fill = tk.BOTH, expand =True)
+        self.select_date_button = Button(self.calendar_window, text ="Select Date", command = self.get_calendar_date)
+        self.select_date_button.pack(ipady = 8)
+    
+    def get_calendar_date(self):
+        self.date_text = self.calendar.get_date()
+        self.date_show_label.configure(text = self.date_text)
+        self.calendar_window.destroy()
+
         
     def open_root(self):
         self.deiconify()
