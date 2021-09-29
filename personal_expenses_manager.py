@@ -14,6 +14,7 @@ from tkinter import Button
 from tkinter import Label
 from tkinter import LabelFrame
 from tkcalendar import Calendar
+from tkinter import messagebox
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure 
 
@@ -82,8 +83,9 @@ class SampleApp(Tk):
         
         self.product_type_label = Label(self.legend_frame,text = "Product Type: ", font = ('Helvetica', 10))
         self.product_type_label.grid(column=0, row=1, ipadx=0, ipady=10)
-        self.product_type_text = tk.Text(self.legend_frame,height = 2,width = 50)
-        self.product_type_text.grid(column=1, row=1)
+        self.product_type_selection = ttk.Combobox(self.legend_frame,values=["Groceries","Luxury","Other"], font = ('Helvetica', 10))
+        self.product_type_selection.grid(column=1,row =1,ipadx=120,ipady=7)
+        self.product_type_selection.current(0)
 
         self.date_of_purchase_label = Label(self.legend_frame,text = "Date of Purchase: ", font = ('Helvetica', 10))
         self.date_of_purchase_label.grid(column=0, row=2, ipadx=0, ipady=10)
@@ -94,14 +96,30 @@ class SampleApp(Tk):
         self.calendar_label= Label(image=self.calendar_button_image)
         self.calendar_button = Button(self.legend_frame,image=self.calendar_button_image, borderwidth=0, command = self.select_date)
         self.calendar_button.grid(column=2,row=2)
-        self.price_of_product_label = Label(self.legend_frame,text = "Price of Product: ", font = ('Helvetica', 10))
+        self.price_of_product_label = Label(self.legend_frame,text = "Price of Product: ₹", font = ('Helvetica', 10))
         self.price_of_product_label.grid(column=0, row=3, ipadx=0, ipady=10)
+        self.price_of_product_text = tk.Text(self.legend_frame,height = 2,width = 50)
+        self.price_of_product_text.grid(column=1, row=3)
         
-
+        self.add_product_button = Button(self.legend_frame, text = "Add", borderwidth=2, bg = "#00ff08",fg = "#ff3700", command=self.add_product)
+        self.add_product_button.grid(column = 1, row=4, ipadx=20,ipady=7)
         
         self.withdraw()
         self.tab_window.protocol("WM_DELETE_WINDOW",self.open_root)
 
+    def add_product(self):
+        self.product_name_show = self.product_name_text.get("1.0",'end-1c')
+        self.product_type_show = self.product_type_selection.get()
+        self.date_of_purchase_show = self.date_show_label.cget("text")
+        self.product_price_show = self.price_of_product_text.get("1.0",'end-1c')
+        if(len(self.product_name_show)==0):
+            messagebox.showerror("Product Name Error","Please Enter the Product Name!")
+        elif(self.date_of_purchase_show == 'dd/mm/yyyy'):
+            messagebox.showerror("Product Date Error","Please Enter the Date of Purchase!")
+        elif(len(self.product_price_show) == 0):
+            messagebox.showerror("Product Price Error","Please Enter the Price of the Product!")
+        else:
+            messagebox.showinfo(title = 'Product Info', message = 'Product Name: '+ self.product_name_show + '\nProduct Type: ' + self.product_type_show + '\nDate of Purchase: ' + self.date_of_purchase_show + '\nProduct Price: ' + self.product_price_show + ' ₹')
     def select_date(self):
         self.calendar_window = tk.Toplevel(self.tab_window)
         self.calendar = Calendar(self.calendar_window,selectmode="day",year= 2021, month=1, day=1, date_pattern = 'dd/mm/y')
