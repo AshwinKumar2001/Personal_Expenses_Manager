@@ -17,6 +17,7 @@ from tkcalendar import Calendar
 from tkinter import messagebox
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure 
+import csv
 
 
 class SampleApp(Tk):
@@ -120,6 +121,11 @@ class SampleApp(Tk):
             messagebox.showerror("Product Price Error","Please Enter the Price of the Product!")
         else:
             messagebox.showinfo(title = 'Product Info', message = 'Product Name: '+ self.product_name_show + '\nProduct Type: ' + self.product_type_show + '\nDate of Purchase: ' + self.date_of_purchase_show + '\nProduct Price: ' + self.product_price_show + ' ₹')
+            self.product_details = [self.product_name_show, self.product_type_show, self.date_of_purchase_show, self.product_price_show]
+            with open('product_details.csv', 'a') as self.file:
+                self.write_details = csv.writer(self.file)
+                self.write_details.writerow(self.product_details)
+
     def select_date(self):
         self.calendar_window = tk.Toplevel(self.tab_window)
         self.calendar = Calendar(self.calendar_window,selectmode="day",year= 2021, month=1, day=1, date_pattern = 'dd/mm/y')
