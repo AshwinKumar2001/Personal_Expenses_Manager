@@ -16,7 +16,8 @@ from tkinter import LabelFrame
 from tkcalendar import Calendar
 from tkinter import messagebox
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-from matplotlib.figure import Figure 
+from matplotlib.figure import Figure
+from pandas import DataFrame 
 import csv
 
 
@@ -45,7 +46,7 @@ class SampleApp(Tk):
         
     def OpenMain(self):
         self.tab_window = tk.Toplevel(self)
-        self.tab_window.geometry("600x500")
+        self.tab_window.geometry("600x600")
         self.tab_window.resizable(False,False)
         self.tab_window.title("Personal Expenses Manager")
         self.customed_style = ttk.Style()
@@ -67,13 +68,23 @@ class SampleApp(Tk):
         self.tabs.add(self.settings_tab, text='Settings')
         self.tabs.pack(expand= True, fill ="both")
         
-        self.f = Figure(figsize=(5,5), dpi = 100)
-        self.a = self.f.add_subplot(111)
-        self.a.plot([1,2,3,4,5,6,7,8],[5,6,1,3,8,9,3,5])
+        self.sample_data = {'Country': ['US','CA','GER','UK','FR'],
+         'Other_Value': [5000,25000,30000,8000,10000],
+         'GDP_Per_Capita': [45000,42000,52000,49000,47000]
+        }
+
+        self.graph_legend_frame = LabelFrame(self.plot_tab,text='Graph View',padx=20, pady=30)
+        self.graph_legend_frame.grid(columnspan=2,ipadx = 150)
+
+        self.sample_dataframe = DataFrame(self.sample_data,columns=['Country','Other_Value','GDP_Per_Capita'])
+        self.data_graph = Figure(figsize=(5,6), dpi = 50)
+        self.a = self.data_graph.add_subplot(111)
+        self.sample_dataframe = self.sample_dataframe[['Country','Other_Value','GDP_Per_Capita']].groupby('Country').sum()
+        self.sample_dataframe.plot(kind='bar', legend=True, ax=self.a)
         
-        self.canvas = FigureCanvasTkAgg(self.f, self.plot_tab)
+        self.canvas = FigureCanvasTkAgg(self.data_graph, self.graph_legend_frame)
         self.canvas.draw()
-        self.canvas.get_tk_widget().pack(side = tk.TOP, fill = tk.BOTH, expand = True)
+        self.canvas.get_tk_widget().pack(side = tk.TOP, fill = tk.BOTH, expand = False)
         
         self.legend_frame = LabelFrame(self.new_product_tab,text='Description',padx=20, pady=30)
         self.legend_frame.grid(columnspan=2,ipadx = 30)
