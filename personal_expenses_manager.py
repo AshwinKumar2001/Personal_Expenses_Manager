@@ -69,17 +69,18 @@ class SampleApp(Tk):
         self.tabs.pack(expand= True, fill ="both")
         
         self.sample_data = {'Country': ['US','CA','GER','UK','FR'],
-         'Other_Value': [5000,25000,30000,8000,10000],
-         'GDP_Per_Capita': [45000,42000,52000,49000,47000]
+         'Other_Value_set': [5000,25000,30000,8000,10000],
+         'GDP_Per_Capita': [45000,42000,52000,49000,47000],
+         'Third_Value_set': [12000,18000,9000,21000,0]
         }
 
         self.graph_legend_frame = LabelFrame(self.plot_tab,text='Graph View',padx=20, pady=30)
         self.graph_legend_frame.grid(columnspan=2,ipadx = 150)
 
-        self.sample_dataframe = DataFrame(self.sample_data,columns=['Country','Other_Value','GDP_Per_Capita'])
+        self.sample_dataframe = DataFrame(self.sample_data,columns=['Country','Other_Value_set','GDP_Per_Capita','Third_Value_set'])
         self.data_graph = Figure(figsize=(5,6), dpi = 50)
         self.a = self.data_graph.add_subplot(111)
-        self.sample_dataframe = self.sample_dataframe[['Country','Other_Value','GDP_Per_Capita']].groupby('Country').sum()
+        self.sample_dataframe = self.sample_dataframe[['Country','Other_Value_set','GDP_Per_Capita','Third_Value_set']].groupby('Country').sum()
         self.sample_dataframe.plot(kind='bar', legend=True, ax=self.a)
         
         self.canvas = FigureCanvasTkAgg(self.data_graph, self.graph_legend_frame)
