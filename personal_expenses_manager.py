@@ -18,6 +18,9 @@ from tkinter import messagebox
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
 from pandas import DataFrame 
+import pandas as pd
+import pandasql as ps
+import datetime
 import csv
 
 
@@ -67,7 +70,7 @@ class SampleApp(Tk):
         self.tabs.add(self.plot_tab, text='Plot')
         self.tabs.add(self.settings_tab, text='Settings')
         self.tabs.pack(expand= True, fill ="both")
-        
+        self.data_value_list = []
         self.sample_data = {'Country': ['US','CA','GER','UK','FR'],
          'Other_Value_set': [5000,25000,30000,8000,10000],
          'GDP_Per_Capita': [45000,42000,52000,49000,47000],
@@ -86,7 +89,10 @@ class SampleApp(Tk):
         self.canvas = FigureCanvasTkAgg(self.data_graph, self.graph_legend_frame)
         self.canvas.draw()
         self.canvas.get_tk_widget().pack(side = tk.TOP, fill = tk.BOTH, expand = False)
-        
+
+        self.select_week_button = Button(self.graph_legend_frame,text = "Select Week",command =self.select_week)
+        self.select_week_button.pack(fill=tk.BOTH)
+
         self.legend_frame = LabelFrame(self.new_product_tab,text='Description',padx=20, pady=30)
         self.legend_frame.grid(columnspan=2,ipadx = 30)
         self.product_name_label = Label(self.legend_frame,text = "Product Name: ", font = ('Helvetica', 10))
@@ -144,13 +150,73 @@ class SampleApp(Tk):
         self.calendar.pack(fill = tk.BOTH, expand =True)
         self.select_date_button = Button(self.calendar_window, text ="Select Date", command = self.get_calendar_date)
         self.select_date_button.pack(ipady = 8)
+
+    def select_week(self):
+        self.graph_calendar_window = tk.Toplevel(self.tab_window)
+        self.graph_calendar = Calendar(self.graph_calendar_window, selectmode="day",year= 2021, month=1, day=1, date_pattern = 'dd/mm/y')
+        self.graph_calendar.pack(fill = tk.BOTH, expand =True)
+        self.select_week_date_button = Button(self.graph_calendar_window, text ="Select Week Start", command = self.get_graph_calendar_date)
+        self.select_week_date_button.pack(ipady = 8)
+
     
     def get_calendar_date(self):
         self.date_text = self.calendar.get_date()
         self.date_show_label.configure(text = self.date_text)
         self.calendar_window.destroy()
 
+    def get_graph_calendar_date(self):
+        self.graph_date_text = self.graph_calendar.get_date()
+        messagebox.showinfo(title = 'Product Info', message = 'Start Date: ' + self.graph_date_text)
+        self.data_value_list = self.data_extract()
+        messagebox.showinfo(title = 'Product Info', message = 'Data List: ' + str(self.power_list))
+        self.graph_calendar_window.destroy()
+
+    def data_extract(self):
+        self.power_list = []
+        self.groceries = []
+        self.luxury = []
+        self.other = []
+        for data_row in range(7):
+            self.custom_dataframe = pd.read_csv('product_details.csv', header=None)
+            self.custom_dataframe.columns = ['Product_Name', 'Product_Category', 'Purchase_Date', 'Product_Price']
+            self.proper_df = self.custom_dataframe.iloc[:,1:]
+            print(self.proper_df,end="\n\n")
+            grouped_df_by_date = self.proper_df[['Product_Category','Purchase_Date','Product_Price']].groupby(['Purchase_Date','Product_Category'], as_index= False).sum('Product_Price')
+            self.date_start_date = datetime.datetime.strptime(self.graph_date_text, "%d/%m/%Y").date()
+            self.date_query = "select * from grouped_df_by_date where Purchase_Date = '"+self.graph_date_text+"'"
+            self.temporary_day_values = ps.sqldf(self.date_query, locals())
+            if(len(self.temporary_day_values)!=0):
+                for data_row in range(len(self.temporary_day_values)):
+                    if self.temporary_day_values['Product_Category'][data_row] == 'Groceries':
+                        self.groceries.append(self.temporary_day_values['Product_Price'][data_row])
+                    elif self.temporary_day_values['Product_Category'][data_row] == 'Luxury':
+                        self.luxury.append(self.temporary_day_values['Product_Price'][data_row])
+                    elif self.temporary_day_values['Product_Category'][data_row] == 'Other':
+                        self.other.append(self.temporary_day_values['Product_Price'][data_row])
+                    
+                # if ((max(len(groceries),len(luxury),len(other)) != min(len(groceries),len(luxury),len(other))) :
+                self.temporary_max_value = max(len(self.groceries),len(self.luxury),len(self.other))
+                if len(self.groceries) != self.temporary_max_value:
+                    self.groceries.append(0)
+                if len(self.luxury) != self.temporary_max_value:
+                    self.luxury.append(0)
+                if len(self.other) != self.temporary_max_value:
+                    self.other.append(0)
+                
+            else:
+                self.groceries.append(0)
+                self.luxury.append(0)
+                self.other.append(0)   
+                
+            self.date_next = self.date_start_date + datetime.timedelta(1)
+            self.graph_date_text = self.date_next.strftime("%d/%m/%Y")
         
+        self.power_list.append(self.groceries)
+        self.power_list.append(self.luxury)
+        self.power_list.append(self.other)
+        
+        return (self.power_list)
+
     def open_root(self):
         self.deiconify()
         self.root_current_state = self.state()
