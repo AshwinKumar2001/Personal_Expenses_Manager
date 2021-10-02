@@ -129,7 +129,8 @@ class SampleApp(Tk):
         self.add_product_button.grid(column = 1, row=4, ipadx=20,ipady=7)
         
         self.withdraw()
-        self.tab_window.protocol("WM_DELETE_WINDOW",self.open_root)
+        self.tab_window.deiconify()
+        self.tab_window.protocol("WM_DELETE_WINDOW",self.close_all)
 
     def add_product(self):
         self.product_name_show = self.product_name_text.get("1.0",'end-1c')
@@ -243,11 +244,12 @@ class SampleApp(Tk):
         
         return (self.power_list)
 
-    def open_root(self):
+    def close_all(self):
         self.deiconify()
         self.root_current_state = self.state()
         if(self.root_current_state == "normal"):
             self.tab_window.destroy()
+            self.destroy()
 
 
 
