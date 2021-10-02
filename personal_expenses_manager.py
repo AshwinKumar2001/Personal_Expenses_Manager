@@ -7,7 +7,7 @@ Created on Thu Aug 12 13:02:03 2021
 
 
 import tkinter as tk                # python 3
-from tkinter import PhotoImage, font as tkfont 
+from tkinter import BooleanVar, PhotoImage, font as tkfont 
 from tkinter import ttk# python 3
 from tkinter import Tk
 from tkinter import Button
@@ -19,6 +19,7 @@ from tkinter import messagebox
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
 from pandas import DataFrame 
+from tkinter import Checkbutton
 import pandas as pd
 import pandasql as ps
 import datetime
@@ -73,6 +74,7 @@ class SampleApp(Tk):
         self.tabs.add(self.settings_tab, text='Settings')
         self.tabs.pack(expand= True, fill ="both")
         self.data_value_list = []
+        self.check_variable = True
         self.sample_data = {'Week Days': ['Day 1','Day 2','Day 3','Day 4','Day 5','Day 6', 'Day 7'],
          'Groceries': [0,0,0,0,0,0,0],
          'Luxury': [0,0,0,0,0,0,0],
@@ -107,7 +109,7 @@ class SampleApp(Tk):
         
         self.product_type_label = Label(self.legend_frame,text = "Product Type: ", font = ('Helvetica', 10))
         self.product_type_label.grid(column=0, row=1, ipadx=0, ipady=10)
-        self.product_type_selection = ttk.Combobox(self.legend_frame,values=["Groceries","Luxury","Other"], font = ('Helvetica', 10))
+        self.product_type_selection = ttk.Combobox(self.legend_frame,values=["Groceries (Starts at 1₹)","Luxury (Starts at 1000₹)","Other (Starts at 500₹)"], font = ('Helvetica', 10))
         self.product_type_selection.grid(column=1,row =1,ipadx=200,ipady=7)
         self.product_type_selection.current(0)
 
@@ -127,14 +129,31 @@ class SampleApp(Tk):
         
         self.add_product_button = Button(self.legend_frame, text = "Add", borderwidth=2, bg = "#00ff08",fg = "#ff3700", command=self.add_product)
         self.add_product_button.grid(column = 1, row=4, ipadx=20,ipady=7)
-        
+
+        self.general_settings_legend_frame = LabelFrame(self.settings_tab,text = "General")
+        self.general_settings_legend_frame.grid(row = 0, column = 0, ipadx = 325, ipady = 100)
+        self.set_warranty_warning_label = Label(self.general_settings_legend_frame, text = "Set Warranty Warning: ", font = ('Helvetica', 10))
+        self.set_warranty_warning_label.grid(row = 0, column = 0)
+        self.warranty_selection_variable = BooleanVar()
+        self.warranty_selection = Checkbutton(self.general_settings_legend_frame, text = "No", var = self.warranty_selection_variable, command =self.check_warranty_set_status)
+        self.warranty_selection.grid(row= 0, column= 2)
+
+
         self.withdraw()
         self.tab_window.deiconify()
         self.tab_window.protocol("WM_DELETE_WINDOW",self.close_all)
 
+    def check_warranty_set_status(self):
+        self.check_variable = self.warranty_selection_variable.get()
+        if(self.check_variable == True):
+            self.warranty_selection.config(text="Yes")
+        else:
+            self.warranty_selection.config(text="No")
     def add_product(self):
+        self.string_sep = " "
         self.product_name_show = self.product_name_text.get("1.0",'end-1c')
         self.product_type_show = self.product_type_selection.get()
+        self.modified_product_type_text = self.product_type_show.split(self.string_sep, 1)[0]
         self.date_of_purchase_show = self.date_show_label.cget("text")
         self.product_price_show = self.price_of_product_text.get("1.0",'end-1c')
         if(len(self.product_name_show)==0):
@@ -145,7 +164,7 @@ class SampleApp(Tk):
             messagebox.showerror("Product Price Error","Please Enter the Price of the Product!")
         else:
             messagebox.showinfo(title = 'Product Info', message = 'Product Name: '+ self.product_name_show + '\nProduct Type: ' + self.product_type_show + '\nDate of Purchase: ' + self.date_of_purchase_show + '\nProduct Price: ' + self.product_price_show + ' ₹')
-            self.product_details = [self.product_name_show, self.product_type_show, self.date_of_purchase_show, self.product_price_show]
+            self.product_details = [self.product_name_show, self.modified_product_type_text, self.date_of_purchase_show, self.product_price_show]
             with open('product_details.csv', 'a', newline= '') as self.file:
                 self.write_details = csv.writer(self.file)
                 self.write_details.writerow(self.product_details)
