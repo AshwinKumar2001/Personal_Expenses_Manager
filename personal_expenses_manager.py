@@ -6,6 +6,7 @@ Created on Thu Aug 12 13:02:03 2021
 """
 
 
+from re import L
 import tkinter as tk                # python 3
 from tkinter import BooleanVar, PhotoImage, font as tkfont 
 from tkinter import ttk# python 3
@@ -14,6 +15,7 @@ from tkinter import Button
 from tkinter import Label
 from tkinter import LabelFrame
 from tkinter.constants import TRUE
+from typing import Text
 from tkcalendar import Calendar
 from tkinter import messagebox
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
@@ -24,7 +26,6 @@ import pandas as pd
 import pandasql as ps
 import datetime
 import csv
-from tkinter import Scrollbar
 
 class SampleApp(Tk):
 
@@ -51,15 +52,15 @@ class SampleApp(Tk):
         
     def OpenMain(self):
         self.tab_window = tk.Toplevel(self)
-        self.tab_window.geometry("800x600")
-        self.tab_window.resizable(True,True)
+        self.tab_window.geometry("700x600")
+        self.tab_window.resizable(False,False)
         self.tab_window.title("Personal Expenses Manager")
         self.customed_style = ttk.Style()
         self.customed_style.configure('Custom.TNotebook.Tab', padding=[0, 0], font=('Helvetica', 10), background="green3")
         self.settings = {
             "TNotebook.Tab": {
             "configure": {
-                 "padding": [112,20],"background": "#808080", "font":("Helvetica",10)}, 
+                 "padding": [96,20],"background": "#808080", "font":("Helvetica",10)}, 
                     "map": {
                         "background": [("selected", "#00FF00"), ("active", "#32CD32")], 
                         "foreground": [("selected", "#000000"), ("active", "#000000")] } } }
@@ -74,20 +75,36 @@ class SampleApp(Tk):
         self.tabs.add(self.settings_tab, text='Settings')
         self.tabs.pack(expand= True, fill ="both")
         self.data_value_list = []
-        self.check_variable = True
+        self.check_variable = False
         self.sample_data = {'Week Days': ['Day 1','Day 2','Day 3','Day 4','Day 5','Day 6', 'Day 7'],
          'Groceries': [0,0,0,0,0,0,0],
          'Luxury': [0,0,0,0,0,0,0],
          'Other': [0,0,0,0,0,0,0]
         }
 
+        self.analysis_legend_frame = LabelFrame(self.plot_tab, text = "Analysis")
+        self.analysis_legend_frame.grid(row = 1, column = 0, sticky = tk.NSEW, ipadx = 250)
+        
+        self.groceries_crossed_label = Label(self.analysis_legend_frame, text = "    Crossed Groceries Limit: ", font = ('Helvetica', 10))
+        self.groceries_crossed_label.grid(row = 0, column = 0)
+        self.groceries_crossed_status = Label(self.analysis_legend_frame, text = "No", font = ('Helvetica', 10))
+        self.groceries_crossed_status.grid(row = 0, column = 1)
+
+        self.luxury_crossed_label = Label(self.analysis_legend_frame, text = "Crossed Luxury Limit: ", font = ('Helvetica', 10))
+        self.luxury_crossed_label.grid(row = 1, column = 0)
+        self.luxury_crossed_status = Label(self.analysis_legend_frame, text = "No", font = ('Helvetica', 10))
+        self.luxury_crossed_status.grid(row = 1, column = 1)
+
+        self.other_crossed_label = Label(self.analysis_legend_frame, text = " Crossed Other/s Limit: ", font = ('Helvetica', 10))
+        self.other_crossed_label.grid(row = 2, column = 0)
+        self.other_crossed_status = Label(self.analysis_legend_frame, text = "No", font = ('Helvetica', 10))
+        self.other_crossed_status.grid(row = 2, column = 1)
+
         self.graph_legend_frame = LabelFrame(self.plot_tab,text='Graph View',padx=20, pady=30)
         self.graph_legend_frame.grid(columnspan=2,ipadx = 250,ipady=100)
-        self.vertical_graph_view = Scrollbar(self.graph_legend_frame)
-        self.vertical_graph_view.pack(side =tk.RIGHT, fill = tk.Y)
 
         self.sample_dataframe = DataFrame(self.sample_data,columns=['Week Days','Groceries','Luxury','Other'])
-        self.data_graph = Figure(figsize=(5,5), dpi = 50)
+        self.data_graph = Figure(figsize=(3,3), dpi = 50)
         self.a = self.data_graph.add_subplot(111)
         self.sample_dataframe = self.sample_dataframe[['Week Days','Groceries','Luxury','Other']].groupby('Week Days').sum()
         self.sample_dataframe.plot(kind='bar', legend=True, ax=self.a)
@@ -104,19 +121,19 @@ class SampleApp(Tk):
         self.legend_frame.grid(columnspan=2,ipadx = 250,ipady = 60)
         self.product_name_label = Label(self.legend_frame,text = "Product Name: ", font = ('Helvetica', 10))
         self.product_name_label.grid(column=0, row=0, ipadx=0, ipady=10)
-        self.product_name_text = tk.Text(self.legend_frame,height = 2,width = 70)
+        self.product_name_text = tk.Text(self.legend_frame,height = 2,width = 60)
         self.product_name_text.grid(column=1, row=0)
         
         self.product_type_label = Label(self.legend_frame,text = "Product Type: ", font = ('Helvetica', 10))
         self.product_type_label.grid(column=0, row=1, ipadx=0, ipady=10)
         self.product_type_selection = ttk.Combobox(self.legend_frame,values=["Groceries (Starts at 1₹)","Luxury (Starts at 1000₹)","Other (Starts at 500₹)"], font = ('Helvetica', 10))
-        self.product_type_selection.grid(column=1,row =1,ipadx=200,ipady=7)
+        self.product_type_selection.grid(column=1,row =1,ipadx=165,ipady=7)
         self.product_type_selection.current(0)
 
         self.date_of_purchase_label = Label(self.legend_frame,text = "Date of Purchase: ", font = ('Helvetica', 10))
         self.date_of_purchase_label.grid(column=0, row=2, ipadx=0, ipady=10)
         self.date_show_label = Label(self.legend_frame, text = "dd/mm/yyyy", font = ('Helvetica', 10),  relief="sunken")
-        self.date_show_label.grid(column =1, row = 2, ipadx= 240, ipady = 7)
+        self.date_show_label.grid(column =1, row = 2, ipadx= 203, ipady = 7)
         self.calendar_button_image = PhotoImage(file = 'calendar.png')
         self.calendar_button_image.subsample(6)
         self.calendar_label= Label(image=self.calendar_button_image)
@@ -124,24 +141,85 @@ class SampleApp(Tk):
         self.calendar_button.grid(column=2,row=2)
         self.price_of_product_label = Label(self.legend_frame,text = "Price of Product: ₹", font = ('Helvetica', 10))
         self.price_of_product_label.grid(column=0, row=3, ipadx=0, ipady=10)
-        self.price_of_product_text = tk.Text(self.legend_frame,height = 2,width = 70)
+        self.price_of_product_text = tk.Text(self.legend_frame,height = 2,width = 60)
         self.price_of_product_text.grid(column=1, row=3)
         
         self.add_product_button = Button(self.legend_frame, text = "Add", borderwidth=2, bg = "#00ff08",fg = "#ff3700", command=self.add_product)
         self.add_product_button.grid(column = 1, row=4, ipadx=20,ipady=7)
 
+        self.special_settings_legend_frame = LabelFrame(self.settings_tab, text = "Special" )
+        self.special_settings_legend_frame.grid(row = 1, column = 0, ipadx = 200, ipady = 100, columnspan= 2, sticky= tk.NSEW)
+
         self.general_settings_legend_frame = LabelFrame(self.settings_tab,text = "General")
-        self.general_settings_legend_frame.grid(row = 0, column = 0, ipadx = 325, ipady = 100)
+        self.general_settings_legend_frame.grid(row = 0, column = 0, ipadx = 200, ipady = 80)
         self.set_warranty_warning_label = Label(self.general_settings_legend_frame, text = "Set Warranty Warning: ", font = ('Helvetica', 10))
         self.set_warranty_warning_label.grid(row = 0, column = 0)
         self.warranty_selection_variable = BooleanVar()
-        self.warranty_selection = Checkbutton(self.general_settings_legend_frame, text = "No", var = self.warranty_selection_variable, command =self.check_warranty_set_status)
-        self.warranty_selection.grid(row= 0, column= 2)
+        self.warranty_selection = Checkbutton(self.general_settings_legend_frame, text = "No", var = self.warranty_selection_variable, command =self.check_warranty_set_status, font = ('Helvetica', 10))
+        self.warranty_selection.grid(row= 0, column= 1)
+        
+        self.groceries_budget_limit_label = Label(self.general_settings_legend_frame,text = "Set Groceries Budget: ₹", font = ('Helvetica', 10))
+        self.groceries_budget_limit_label.grid(row = 1  , column = 0,  ipadx=0, ipady=10)
+        self.groceries_budget_limit_text = tk.Text(self.general_settings_legend_frame,height = 2,width = 70)
+        self.groceries_budget_limit_text.grid(row = 1, column = 1)
+
+        self.luxury_budget_limit_label = Label(self.general_settings_legend_frame,text = "Set Luxury Budget: ₹", font = ('Helvetica', 10))
+        self.luxury_budget_limit_label.grid(row = 2  , column = 0,  ipadx=0, ipady=10)
+        self.luxury_budget_limit_text = tk.Text(self.general_settings_legend_frame,height = 2,width = 70)
+        self.luxury_budget_limit_text.grid(row = 2, column = 1)
+
+        self.other_budget_limit_label = Label(self.general_settings_legend_frame,text = "Set Other/s Budget: ₹", font = ('Helvetica', 10))
+        self.other_budget_limit_label.grid(row = 3  , column = 0,  ipadx=0, ipady=10)
+        self.other_budget_limit_text = tk.Text(self.general_settings_legend_frame,height = 2,width = 70)
+        self.other_budget_limit_text.grid(row = 3, column = 1)
+
+        self.save_general_settings_button = Button(self.general_settings_legend_frame, text = "Save", command = self.save_general_settings, bg = "#00ff08",fg = "#ff3700")
+        self.save_general_settings_button.grid(row = 5, column = 1, ipadx= 80, ipady= 7)
+
+        self.fill_initial_settings()
 
 
         self.withdraw()
         self.tab_window.deiconify()
         self.tab_window.protocol("WM_DELETE_WINDOW",self.close_all)
+
+    def fill_initial_settings(self):
+        self.fill_general_settings_reader_file = open('general_settings.csv')
+        self.fill_general_settings_reader = csv.reader(self.fill_general_settings_reader_file)
+        self.fill_general_settings_list_rows = []
+        for row in self.fill_general_settings_reader:
+            self.fill_general_settings_list_rows.append(row)
+        self.tofill_warranty_status = self.fill_general_settings_list_rows[0][0]
+        self.tofill_groceries_budget_value = int(self.fill_general_settings_list_rows[0][1])
+        self.tofill_luxury_budget_value = int(self.fill_general_settings_list_rows[0][2])
+        self.tofill_other_budget_value = int(self.fill_general_settings_list_rows[0][3])
+        if (self.tofill_warranty_status == "Yes"):
+            self.warranty_selection.select()
+            self.check_warranty_set_status()
+        self.groceries_budget_limit_text.insert(tk.END, self.tofill_groceries_budget_value)
+        self.luxury_budget_limit_text.insert(tk.END, self.tofill_luxury_budget_value)
+        self.other_budget_limit_text.insert(tk.END, self.tofill_other_budget_value)
+
+    def save_general_settings(self):
+        if(self.check_variable == True):
+            self.warranty_status_text = "Yes"
+        else:
+            self.warranty_status_text = "No"         
+        self.groceries_limit_text =  self.groceries_budget_limit_text.get("1.0",'end-1c')
+        self.luxury_limit_text = self.luxury_budget_limit_text.get("1.0",'end-1c')
+        self.other_limit_text = self.other_budget_limit_text.get("1.0",'end-1c')
+        if (self.groceries_limit_text == ""):
+            self.groceries_limit_text = "0"
+        if (self.luxury_limit_text == ""):
+            self.luxury_limit_text = "0"
+        if (self.other_limit_text == ""):
+            self.other_limit_text = "0"  
+        self.general_settings_list = [self.warranty_status_text, self.groceries_limit_text, self.luxury_limit_text, self.other_limit_text]
+        with open('general_settings.csv', 'w', newline= '') as self.gsfile:
+            self.write_general_settings_details = csv.writer(self.gsfile)
+            self.write_general_settings_details.writerow(self.general_settings_list)   
+        self.gsfile.close()                   
+        print(self.warranty_status_text,self.groceries_limit_text,self.luxury_limit_text, self.other_limit_text, sep = "\n")
 
     def check_warranty_set_status(self):
         self.check_variable = self.warranty_selection_variable.get()
@@ -205,7 +283,7 @@ class SampleApp(Tk):
         self.graph_legend_frame.grid(columnspan=2,ipadx = 250,ipady=100)
 
         self.extracted_dataframe = DataFrame(self.extracted_data,columns=['Week Days','Groceries','Luxury','Other'])
-        self.data_graph = Figure(figsize=(5,5), dpi = 50)
+        self.data_graph = Figure(figsize=(3,3), dpi = 50)
         self.a = self.data_graph.add_subplot(111)
         self.extracted_dataframe = self.extracted_dataframe[['Week Days','Groceries','Luxury','Other']].groupby('Week Days').sum()
         self.extracted_dataframe.plot(kind='bar', legend=True, ax=self.a)
@@ -214,8 +292,30 @@ class SampleApp(Tk):
         self.canvas.draw()
         self.canvas.get_tk_widget().pack(fill = tk.BOTH, expand = True)
 
+        self.groceries_budget_label = Label(self.plot_tab, text = "Groceries Budget Exceeded? ", font = ('Helvetica', 10))
+        self.luxuries_budget_label = Label(self.plot_tab, text = "Luxuries Budget Exceeded? ", font = ('Helvetica', 10))
+        self.other_budget_label = Label(self.plot_tab, text = "Other Budget Exceeded? ", font = ('Helvetica', 10))
+        self.groceries_budget_value_label = Label(self.plot_tab, text = "No", font = ('Helvetica', 10))
+        self.luxuries_budget_value_label = Label(self.plot_tab, text = "No ", font = ('Helvetica', 10))
+        self.other_budget_value_label = Label(self.plot_tab, text = "No ", font = ('Helvetica', 10))
+
         self.select_week_button = Button(self.graph_legend_frame,text = "Select Week",bg = "#00ff08",fg = "#ff3700",command =self.select_week)
         self.select_week_button.pack(fill=tk.BOTH)
+
+        self.general_settings_reader_file = open('general_settings.csv')
+        self.general_settings_reader = csv.reader(self.general_settings_reader_file)
+        self.settings_list_rows = []
+        for row in self.general_settings_reader:
+            self.settings_list_rows.append(row)
+        self.groceries_budget_value = int(self.settings_list_rows[0][1])
+        self.luxury_budget_value = int(self.settings_list_rows[0][2])
+        self.other_budget_value = int(self.settings_list_rows[0][3])
+        if (sum(self.data_value_list[0]) > self.groceries_budget_value):
+            self.groceries_crossed_status.config(text ="Yes")
+        if (sum(self.data_value_list[1]) > self.luxury_budget_value):
+            self.luxury_crossed_status.config(text ="Yes")
+        if (sum(self.data_value_list[2]) > self.other_budget_value):
+            self.other_crossed_status.config(text ="Yes")
         self.graph_calendar_window.destroy()
 
     def data_extract(self):
