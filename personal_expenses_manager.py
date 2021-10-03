@@ -8,7 +8,7 @@ Created on Thu Aug 12 13:02:03 2021
 
 from re import L
 import tkinter as tk                # python 3
-from tkinter import BooleanVar, PhotoImage, font as tkfont 
+from tkinter import BooleanVar, PhotoImage, Toplevel, font as tkfont 
 from tkinter import ttk# python 3
 from tkinter import Tk
 from tkinter import Button
@@ -22,12 +22,14 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
 from pandas import DataFrame 
 from tkinter import Checkbutton
+from tkinter import Scrollbar
 import pandas as pd
 import pandasql as ps
 import datetime
 import csv
 
 class SampleApp(Tk):
+    #----------------------------------Introduction Page--------------------------------#
 
     def __init__(self, *args, **kwargs):
         Tk.__init__(self, *args, **kwargs)
@@ -37,10 +39,6 @@ class SampleApp(Tk):
         self.resizable(False,False)
         self.root_current_state = ""
         
-
-        # the container is where we'll stack a bunch of frames
-        # on top of each other, then the one we want visible
-        # will be raised above the others
         self.configure(bg= "#9803fc",padx = 100)
 
 
@@ -49,7 +47,10 @@ class SampleApp(Tk):
 
         self.proceed = tk.Button(self, text="Next",bg = "#b942f5",fg = "#45f542",command = self.OpenMain)
         self.proceed.pack()
-        
+
+    #----------------------------------------------------------------------------------#
+
+    #----------------------------------Main Work Window--------------------------------#   
     def OpenMain(self):
         self.tab_window = tk.Toplevel(self)
         self.tab_window.geometry("700x600")
@@ -66,6 +67,12 @@ class SampleApp(Tk):
                         "foreground": [("selected", "#000000"), ("active", "#000000")] } } }
         self.customed_style.theme_create("tab_theme",parent="alt", settings = self.settings)
         self.customed_style.theme_use("tab_theme")
+        self.display_dataframe = pd.read_csv('product_details.csv', header=None)
+        self.display_dataframe.columns = ['Product Name', 'Product Category', 'Purchase Date', 'Product Price']
+        self.display_dataframe.to_csv('custom_details.csv', index = False)
+
+        #----------------------------------Creating Tabs--------------------------------#
+
         self.tabs = ttk.Notebook(self.tab_window, style = 'Custom.TNotebook')
         self.new_product_tab = ttk.Frame(self.tabs)
         self.plot_tab = ttk.Frame(self.tabs)
@@ -74,6 +81,11 @@ class SampleApp(Tk):
         self.tabs.add(self.plot_tab, text='Plot')
         self.tabs.add(self.settings_tab, text='Settings')
         self.tabs.pack(expand= True, fill ="both")
+
+        #----------------------------------------------------------------------------------#
+
+        #------------------------------Initial Graph Data----------------------------------#
+
         self.data_value_list = []
         self.check_variable = False
         self.sample_data = {'Week Days': ['Day 1','Day 2','Day 3','Day 4','Day 5','Day 6', 'Day 7'],
@@ -82,9 +94,16 @@ class SampleApp(Tk):
          'Other': [0,0,0,0,0,0,0]
         }
 
+        #----------------------------------------------------------------------------------#
+
+        #-------------------------!!!!!-Plot Tab Begins Here-!!!!!-------------------------#
+
+        #-------------------------------Analysis Frame (Plot Tab)--------------------------#
+
         self.analysis_legend_frame = LabelFrame(self.plot_tab, text = "Analysis")
         self.analysis_legend_frame.grid(row = 1, column = 0, sticky = tk.NSEW, ipadx = 250)
         
+        #-------------------------------Here you will get to see if there was a budget overflow/cross
         self.groceries_crossed_label = Label(self.analysis_legend_frame, text = "    Crossed Groceries Limit: ", font = ('Helvetica', 10))
         self.groceries_crossed_label.grid(row = 0, column = 0)
         self.groceries_crossed_status = Label(self.analysis_legend_frame, text = "No", font = ('Helvetica', 10))
@@ -100,9 +119,14 @@ class SampleApp(Tk):
         self.other_crossed_status = Label(self.analysis_legend_frame, text = "No", font = ('Helvetica', 10))
         self.other_crossed_status.grid(row = 2, column = 1)
 
+        #----------------------------------------------------------------------------------#
+
+        #----------------------------------Graph Frame (Plot Tab)--------------------------#
+
         self.graph_legend_frame = LabelFrame(self.plot_tab,text='Graph View',padx=20, pady=30)
         self.graph_legend_frame.grid(columnspan=2,ipadx = 250,ipady=100)
 
+        #----------------------------------Graph area (canvas) is shown here
         self.sample_dataframe = DataFrame(self.sample_data,columns=['Week Days','Groceries','Luxury','Other'])
         self.data_graph = Figure(figsize=(3,3), dpi = 50)
         self.a = self.data_graph.add_subplot(111)
@@ -116,7 +140,13 @@ class SampleApp(Tk):
         self.select_week_button = Button(self.graph_legend_frame,text = "Select Week",bg = "#00ff08",fg = "#ff3700",command =self.select_week)
         self.select_week_button.pack(fill=tk.BOTH)
 
+        #-----------------------------<<<<<<<< Plot Tab ends >>>>>>>>>-------------------------#
 
+        #-------------------------!!!!!!- New(+) Tab begins here-!!!!!!------------------------#
+
+        #-------------------------Product Description Frame (Entry area)-------------------#
+
+        #--------------------------Product name entry textbox
         self.legend_frame = LabelFrame(self.new_product_tab,text='Description')
         self.legend_frame.grid(columnspan=2,ipadx = 250,ipady = 60)
         self.product_name_label = Label(self.legend_frame,text = "Product Name: ", font = ('Helvetica', 10))
@@ -124,12 +154,14 @@ class SampleApp(Tk):
         self.product_name_text = tk.Text(self.legend_frame,height = 2,width = 60)
         self.product_name_text.grid(column=1, row=0)
         
+        #--------------------------Product type entry combobox(optionbox)
         self.product_type_label = Label(self.legend_frame,text = "Product Type: ", font = ('Helvetica', 10))
         self.product_type_label.grid(column=0, row=1, ipadx=0, ipady=10)
         self.product_type_selection = ttk.Combobox(self.legend_frame,values=["Groceries (Starts at 1₹)","Luxury (Starts at 1000₹)","Other (Starts at 500₹)"], font = ('Helvetica', 10))
         self.product_type_selection.grid(column=1,row =1,ipadx=165,ipady=7)
         self.product_type_selection.current(0)
 
+        #--------------------------Date of purchase label (Calendar selection)
         self.date_of_purchase_label = Label(self.legend_frame,text = "Date of Purchase: ", font = ('Helvetica', 10))
         self.date_of_purchase_label.grid(column=0, row=2, ipadx=0, ipady=10)
         self.date_show_label = Label(self.legend_frame, text = "dd/mm/yyyy", font = ('Helvetica', 10),  relief="sunken")
@@ -147,41 +179,91 @@ class SampleApp(Tk):
         self.add_product_button = Button(self.legend_frame, text = "Add", borderwidth=2, bg = "#00ff08",fg = "#ff3700", command=self.add_product)
         self.add_product_button.grid(column = 1, row=4, ipadx=20,ipady=7)
 
+        #----------------------------------------------------------------------------------#
+
+        #--------------------------------<<<<<< New (+) Tab ends >>>>>---------------------#
+
+        #--------------------------!!!!!-Settings tabs begins here-!!!!!-------------------#
+
+        #---------------------Creating two frames for two types of Settings----------------#
         self.special_settings_legend_frame = LabelFrame(self.settings_tab, text = "Special" )
-        self.special_settings_legend_frame.grid(row = 1, column = 0, ipadx = 200, ipady = 100, columnspan= 2, sticky= tk.NSEW)
+        self.special_settings_legend_frame.grid(row = 1, column = 0, ipadx = 200, ipady = 120, columnspan= 2, sticky= tk.NSEW)
 
         self.general_settings_legend_frame = LabelFrame(self.settings_tab,text = "General")
-        self.general_settings_legend_frame.grid(row = 0, column = 0, ipadx = 200, ipady = 80)
+        self.general_settings_legend_frame.grid(row = 0, column = 0, ipadx = 200, ipady = 10)
         self.set_warranty_warning_label = Label(self.general_settings_legend_frame, text = "Set Warranty Warning: ", font = ('Helvetica', 10))
         self.set_warranty_warning_label.grid(row = 0, column = 0)
         self.warranty_selection_variable = BooleanVar()
         self.warranty_selection = Checkbutton(self.general_settings_legend_frame, text = "No", var = self.warranty_selection_variable, command =self.check_warranty_set_status, font = ('Helvetica', 10))
         self.warranty_selection.grid(row= 0, column= 1)
         
+        #----------------------------Add your desired budget limits here
         self.groceries_budget_limit_label = Label(self.general_settings_legend_frame,text = "Set Groceries Budget: ₹", font = ('Helvetica', 10))
         self.groceries_budget_limit_label.grid(row = 1  , column = 0,  ipadx=0, ipady=10)
-        self.groceries_budget_limit_text = tk.Text(self.general_settings_legend_frame,height = 2,width = 70)
+        self.groceries_budget_limit_text = tk.Text(self.general_settings_legend_frame,height = 2,width = 60)
         self.groceries_budget_limit_text.grid(row = 1, column = 1)
 
         self.luxury_budget_limit_label = Label(self.general_settings_legend_frame,text = "Set Luxury Budget: ₹", font = ('Helvetica', 10))
         self.luxury_budget_limit_label.grid(row = 2  , column = 0,  ipadx=0, ipady=10)
-        self.luxury_budget_limit_text = tk.Text(self.general_settings_legend_frame,height = 2,width = 70)
+        self.luxury_budget_limit_text = tk.Text(self.general_settings_legend_frame,height = 2,width = 60)
         self.luxury_budget_limit_text.grid(row = 2, column = 1)
 
         self.other_budget_limit_label = Label(self.general_settings_legend_frame,text = "Set Other/s Budget: ₹", font = ('Helvetica', 10))
         self.other_budget_limit_label.grid(row = 3  , column = 0,  ipadx=0, ipady=10)
-        self.other_budget_limit_text = tk.Text(self.general_settings_legend_frame,height = 2,width = 70)
+        self.other_budget_limit_text = tk.Text(self.general_settings_legend_frame,height = 2,width = 60)
         self.other_budget_limit_text.grid(row = 3, column = 1)
 
+        #------------------------------Save Button to save your settings in csv file
         self.save_general_settings_button = Button(self.general_settings_legend_frame, text = "Save", command = self.save_general_settings, bg = "#00ff08",fg = "#ff3700")
-        self.save_general_settings_button.grid(row = 5, column = 1, ipadx= 80, ipady= 7)
+        self.save_general_settings_button.grid(row = 4, column = 1, ipadx= 63, ipady= 7, padx= 10, pady = 12)
+
+        self.view_data_button = Button(self.general_settings_legend_frame, text ="View Data", command = self.view_data, bg = "#00ff08",fg = "#ff3700")
+        self.view_data_button.grid(row = 5, column = 1,ipadx = 50, ipady = 7, padx= 10, pady = 12)
 
         self.fill_initial_settings()
+
+        #------------------------<<<<< Settings tab ends >>>>>>>-----------------------------#
 
 
         self.withdraw()
         self.tab_window.deiconify()
         self.tab_window.protocol("WM_DELETE_WINDOW",self.close_all)
+
+    #----------------------------<<<<<< Main Work Window ends >>>>>>---------------------------#
+
+    #-----------------------------Function to View the CSV data in a tkinter table
+
+    def view_data(self):
+        self.data_window = Toplevel(self.tab_window, height = 100, width = 250)
+        self.data_window.resizable(True,True)
+        self.data_window_scrollbarx = Scrollbar(self.data_window, orient=tk.HORIZONTAL)
+        self.data_window_scrollbary = Scrollbar(self.data_window, orient=tk.VERTICAL)
+        self.data_tree = ttk.Treeview(self.data_window, columns=("Product Name", "Product Category", "Purchase Date", "Product Price"), height=20, selectmode="extended", yscrollcommand=self.data_window_scrollbary.set, xscrollcommand=self.data_window_scrollbarx.set)
+        self.data_window_scrollbary.config(command=self.data_tree.yview)
+        self.data_window_scrollbary.pack(side=tk.RIGHT, fill=tk.Y)
+        self.data_window_scrollbarx.config(command=self.data_tree.xview)
+        self.data_window_scrollbarx.pack(side=tk.BOTTOM, fill=tk.X)
+        self.data_tree.heading('Product Name', text="Product Name", anchor=tk.W)
+        self.data_tree.heading('Product Category', text="Product Category", anchor=tk.W)
+        self.data_tree.heading('Purchase Date', text="Purchase Date", anchor=tk.W)
+        self.data_tree.heading('Product Price', text="Product Price", anchor=tk.W)
+        self.data_tree.column('#0', stretch=tk.NO, minwidth=0, width=0)
+        self.data_tree.column('#1', stretch=tk.NO, minwidth=0, width=120)
+        self.data_tree.column('#2', stretch=tk.NO, minwidth=0, width=120)
+        self.data_tree.column('#3', stretch=tk.NO, minwidth=0, width=120)
+        self.data_tree.column('#4', stretch=tk.NO, minwidth=0, width=120)
+        self.data_tree.pack()
+
+        with open('custom_details.csv') as readfile:
+            self.data_reader = csv.DictReader(readfile, delimiter=',')
+            for row in self.data_reader:
+                self.pname = row['Product Name']
+                self.ptype = row['Product Category']
+                self.pdate = row['Purchase Date']
+                self.pprice = row['Product Price']
+                self.data_tree.insert("", 0, values=(self.pname, self.ptype, self.pdate, self.pprice))
+
+    #------------------ This will fill in the settings for Settings tab if it exists in CSV file
 
     def fill_initial_settings(self):
         self.fill_general_settings_reader_file = open('general_settings.csv')
@@ -200,6 +282,7 @@ class SampleApp(Tk):
         self.luxury_budget_limit_text.insert(tk.END, self.tofill_luxury_budget_value)
         self.other_budget_limit_text.insert(tk.END, self.tofill_other_budget_value)
 
+    #-----------------------Save the entered settings into the CSV file
     def save_general_settings(self):
         if(self.check_variable == True):
             self.warranty_status_text = "Yes"
@@ -221,12 +304,15 @@ class SampleApp(Tk):
         self.gsfile.close()                   
         print(self.warranty_status_text,self.groceries_limit_text,self.luxury_limit_text, self.other_limit_text, sep = "\n")
 
+    #----------------------- Checks if the warranty warning setting is activated
     def check_warranty_set_status(self):
         self.check_variable = self.warranty_selection_variable.get()
         if(self.check_variable == True):
             self.warranty_selection.config(text="Yes")
         else:
             self.warranty_selection.config(text="No")
+    
+    #------------------------ Adds the product details given by user into products CSV file 
     def add_product(self):
         self.string_sep = " "
         self.product_name_show = self.product_name_text.get("1.0",'end-1c')
@@ -246,7 +332,11 @@ class SampleApp(Tk):
             with open('product_details.csv', 'a', newline= '') as self.file:
                 self.write_details = csv.writer(self.file)
                 self.write_details.writerow(self.product_details)
+                self.display_dataframe = pd.read_csv('product_details.csv', header=None)
+                self.display_dataframe.columns = ['Product Name', 'Product Category', 'Purchase Date', 'Product Price']
+                self.display_dataframe.to_csv('custom_details.csv', index = False)
 
+    #----------------------------- Allows selection of date of purchase for product
     def select_date(self):
         self.calendar_window = tk.Toplevel(self.tab_window)
         self.calendar = Calendar(self.calendar_window,selectmode="day",year= 2021, month=1, day=1, date_pattern = 'dd/mm/y')
@@ -254,6 +344,7 @@ class SampleApp(Tk):
         self.select_date_button = Button(self.calendar_window, text ="Select Date", command = self.get_calendar_date)
         self.select_date_button.pack(ipady = 8)
 
+    #----------------------------- Helps user select the start date of a particular week for analysis
     def select_week(self):
         self.graph_calendar_window = tk.Toplevel(self.tab_window)
         self.graph_calendar = Calendar(self.graph_calendar_window, selectmode="day",year= 2021, month=1, day=1, date_pattern = 'dd/mm/y')
@@ -261,12 +352,14 @@ class SampleApp(Tk):
         self.select_week_date_button = Button(self.graph_calendar_window, text ="Select Week Start", command = self.get_graph_calendar_date)
         self.select_week_date_button.pack(ipady = 8)
 
-    
+    #----------------------------- Gets calendar date from user choice for product date.
     def get_calendar_date(self):
         self.date_text = self.calendar.get_date()
         self.date_show_label.configure(text = self.date_text)
         self.calendar_window.destroy()
 
+    #----------------------------- Gets week start date, calculates product category price values...
+    #----------------------------- ... and displays the same in a graph canvas
     def get_graph_calendar_date(self):
         self.graph_date_text = self.graph_calendar.get_date()
         messagebox.showinfo(title = 'Product Info', message = 'Start Date: ' + self.graph_date_text)
@@ -314,10 +407,13 @@ class SampleApp(Tk):
             self.groceries_crossed_status.config(text ="Yes")
         if (sum(self.data_value_list[1]) > self.luxury_budget_value):
             self.luxury_crossed_status.config(text ="Yes")
+            print(sum(self.data_value_list[1]),self.luxury_budget_value,sep = "\n")
         if (sum(self.data_value_list[2]) > self.other_budget_value):
             self.other_crossed_status.config(text ="Yes")
         self.graph_calendar_window.destroy()
 
+    # ------------------------------- Extracts the data from CSV file, It uses SQL query to filter required data.
+    #-------------------------------- This data will then be used for graph plotting.
     def data_extract(self):
         self.power_list = []
         self.groceries = []
@@ -363,6 +459,7 @@ class SampleApp(Tk):
         
         return (self.power_list)
 
+    #---------------------------- Closes the Work Window and the Introduction Window 
     def close_all(self):
         self.deiconify()
         self.root_current_state = self.state()
