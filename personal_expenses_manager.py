@@ -235,7 +235,8 @@ class SampleApp(Tk):
 
     def view_data(self):
         self.data_window = Toplevel(self.tab_window, height = 100, width = 250)
-        self.data_window.resizable(True,True)
+        self.data_window.resizable(False,False)
+        self.data_window.title("Product Data")
         self.data_window_scrollbarx = Scrollbar(self.data_window, orient=tk.HORIZONTAL)
         self.data_window_scrollbary = Scrollbar(self.data_window, orient=tk.VERTICAL)
         self.data_tree = ttk.Treeview(self.data_window, columns=("Product Name", "Product Category", "Purchase Date", "Product Price"), height=20, selectmode="extended", yscrollcommand=self.data_window_scrollbary.set, xscrollcommand=self.data_window_scrollbarx.set)
@@ -405,11 +406,16 @@ class SampleApp(Tk):
         self.other_budget_value = int(self.settings_list_rows[0][3])
         if (sum(self.data_value_list[0]) > self.groceries_budget_value):
             self.groceries_crossed_status.config(text ="Yes")
+        else:
+            self.groceries_crossed_status.config(text ="No")
         if (sum(self.data_value_list[1]) > self.luxury_budget_value):
             self.luxury_crossed_status.config(text ="Yes")
-            print(sum(self.data_value_list[1]),self.luxury_budget_value,sep = "\n")
+        else:
+            self.luxury_crossed_status.config(text ="No")
         if (sum(self.data_value_list[2]) > self.other_budget_value):
             self.other_crossed_status.config(text ="Yes")
+        else:
+            self.other_crossed_status.config(text ="No")
         self.graph_calendar_window.destroy()
 
     # ------------------------------- Extracts the data from CSV file, It uses SQL query to filter required data.
