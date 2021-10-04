@@ -283,9 +283,18 @@ class SampleApp(Tk):
         for row in self.fill_general_settings_reader:
             self.fill_general_settings_list_rows.append(row)
         self.tofill_warranty_status = self.fill_general_settings_list_rows[0][0]
-        self.tofill_groceries_budget_value = int(self.fill_general_settings_list_rows[0][1])
-        self.tofill_luxury_budget_value = int(self.fill_general_settings_list_rows[0][2])
-        self.tofill_other_budget_value = int(self.fill_general_settings_list_rows[0][3])
+        if(self.fill_general_settings_list_rows[0][1]!=""):
+            self.tofill_groceries_budget_value = int(self.fill_general_settings_list_rows[0][1])
+        else:
+            self.tofill_groceries_budget_value =""
+        if(self.fill_general_settings_list_rows[0][2]!=""):
+            self.tofill_luxury_budget_value = int(self.fill_general_settings_list_rows[0][2])
+        else:
+            self.tofill_luxury_budget_value =""            
+        if(self.fill_general_settings_list_rows[0][3]!=""):
+            self.tofill_other_budget_value = int(self.fill_general_settings_list_rows[0][3])
+        else:
+            self.tofill_other_budget_value =""            
         if (self.tofill_warranty_status == "Yes"):
             self.warranty_selection.select()
             self.check_warranty_set_status()
@@ -303,11 +312,11 @@ class SampleApp(Tk):
         self.luxury_limit_text = self.luxury_budget_limit_text.get("1.0",'end-1c')
         self.other_limit_text = self.other_budget_limit_text.get("1.0",'end-1c')
         if (self.groceries_limit_text == ""):
-            self.groceries_limit_text = "0"
+            self.groceries_limit_text = ""
         if (self.luxury_limit_text == ""):
-            self.luxury_limit_text = "0"
+            self.luxury_limit_text = ""
         if (self.other_limit_text == ""):
-            self.other_limit_text = "0"  
+            self.other_limit_text = ""  
         self.general_settings_list = [self.warranty_status_text, self.groceries_limit_text, self.luxury_limit_text, self.other_limit_text]
         with open('general_settings.csv', 'w', newline= '') as self.gsfile:
             self.write_general_settings_details = csv.writer(self.gsfile)
@@ -413,21 +422,33 @@ class SampleApp(Tk):
         self.settings_list_rows = []
         for row in self.general_settings_reader:
             self.settings_list_rows.append(row)
-        self.groceries_budget_value = int(self.settings_list_rows[0][1])
-        self.luxury_budget_value = int(self.settings_list_rows[0][2])
-        self.other_budget_value = int(self.settings_list_rows[0][3])
-        if (sum(self.data_value_list[0]) > self.groceries_budget_value):
-            self.groceries_crossed_status.config(text ="Yes")
+        if(self.settings_list_rows[0][1]!=""):
+            self.groceries_budget_value = int(self.settings_list_rows[0][1])
         else:
-            self.groceries_crossed_status.config(text ="No")
-        if (sum(self.data_value_list[1]) > self.luxury_budget_value):
-            self.luxury_crossed_status.config(text ="Yes")
+            self.groceries_budget_value =""
+        if(self.settings_list_rows[0][1]!=""):
+            self.luxury_budget_value = int(self.settings_list_rows[0][2])
         else:
-            self.luxury_crossed_status.config(text ="No")
-        if (sum(self.data_value_list[2]) > self.other_budget_value):
-            self.other_crossed_status.config(text ="Yes")
+            self.luxury_budget_value = ""
+        if(self.settings_list_rows[0][1]!=""):
+            self.other_budget_value = int(self.settings_list_rows[0][3])
         else:
-            self.other_crossed_status.config(text ="No")
+            self.other_budget_value = ""
+        if(self.groceries_budget_value!=""):
+            if (sum(self.data_value_list[0]) > self.groceries_budget_value):
+                self.groceries_crossed_status.config(text ="Yes")
+            else:
+                self.groceries_crossed_status.config(text ="No")
+        if(self.luxury_budget_value!=""):
+            if (sum(self.data_value_list[1]) > self.luxury_budget_value):
+                self.luxury_crossed_status.config(text ="Yes")
+            else:
+                self.luxury_crossed_status.config(text ="No")
+        if(self.other_budget_value!=""):
+            if (sum(self.data_value_list[2]) > self.other_budget_value):
+                self.other_crossed_status.config(text ="Yes")
+            else:
+                self.other_crossed_status.config(text ="No")
         self.net_price_for_day = []
         self.net_value = 0
         for i in range(len(self.data_value_list[0])):
