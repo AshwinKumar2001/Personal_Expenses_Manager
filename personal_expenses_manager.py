@@ -9,7 +9,7 @@ Created on Thu Aug 12 13:02:03 2021
 from re import L
 import tkinter as tk                # python 3
 from tkinter import BooleanVar, PhotoImage, Toplevel, font as tkfont 
-from tkinter import ttk# python 3
+from tkinter import ttk             # python 3
 from tkinter import Tk
 from tkinter import Button
 from tkinter import Label
@@ -38,7 +38,11 @@ class SampleApp(Tk):
         self.title("Welcome to PEM")
         self.resizable(False,False)
         self.root_current_state = ""
-        
+        self.taskbar_image = PhotoImage(file = "pem_rupee.png")
+        self.taskbar_image = self.taskbar_image.zoom(25)
+        self.taskbar_image = self.taskbar_image.subsample(12)
+        self.calendar_taskbar_image = PhotoImage(file = "calendar_taskbar.png")
+        self.iconphoto(False,self.taskbar_image)
         self.configure(bg= "#9803fc",padx = 100)
 
 
@@ -55,6 +59,7 @@ class SampleApp(Tk):
         self.tab_window = tk.Toplevel(self)
         self.tab_window.geometry("700x600")
         self.tab_window.resizable(False,False)
+        self.tab_window.iconphoto(False,self.taskbar_image)
         self.tab_window.title("Personal Expenses Manager")
         self.customed_style = ttk.Style()
         self.customed_style.configure('Custom.TNotebook.Tab', padding=[0, 0], font=('Helvetica', 10), background="green3")
@@ -101,7 +106,7 @@ class SampleApp(Tk):
         #-------------------------------Analysis Frame (Plot Tab)--------------------------#
 
         self.analysis_legend_frame = LabelFrame(self.plot_tab, text = "Analysis")
-        self.analysis_legend_frame.grid(row = 1, column = 0, sticky = tk.NSEW, ipadx = 250)
+        self.analysis_legend_frame.grid(row = 1, column = 0,sticky= tk.NSEW,ipadx = 250)
         
         #-------------------------------Here you will get to see if there was a budget overflow/cross
         self.groceries_crossed_label = Label(self.analysis_legend_frame, text = "    Crossed Groceries Limit: ", font = ('Helvetica', 10))
@@ -119,12 +124,17 @@ class SampleApp(Tk):
         self.other_crossed_status = Label(self.analysis_legend_frame, text = "No", font = ('Helvetica', 10))
         self.other_crossed_status.grid(row = 2, column = 1)
 
+        self.average_expenditure_label = Label(self.analysis_legend_frame, text = "Average Expenditure: ₹", font = ('Helvetica', 10))
+        self.average_expenditure_label.grid(row = 3, column = 0)
+        self.average_expenditure_value = Label(self.analysis_legend_frame, text = "0", font = ('Helvetica', 10))
+        self.average_expenditure_value.grid(row = 3, column = 1)
+
         #----------------------------------------------------------------------------------#
 
         #----------------------------------Graph Frame (Plot Tab)--------------------------#
 
         self.graph_legend_frame = LabelFrame(self.plot_tab,text='Graph View',padx=20, pady=30)
-        self.graph_legend_frame.grid(columnspan=2,ipadx = 250,ipady=100)
+        self.graph_legend_frame.grid(columnspan=2,sticky = tk.NSEW, ipadx = 200,ipady=100)
 
         #----------------------------------Graph area (canvas) is shown here
         self.sample_dataframe = DataFrame(self.sample_data,columns=['Week Days','Groceries','Luxury','Other'])
@@ -340,6 +350,7 @@ class SampleApp(Tk):
     #----------------------------- Allows selection of date of purchase for product
     def select_date(self):
         self.calendar_window = tk.Toplevel(self.tab_window)
+        self.calendar_window.iconphoto(False,self.calendar_taskbar_image)
         self.calendar = Calendar(self.calendar_window,selectmode="day",year= 2021, month=1, day=1, date_pattern = 'dd/mm/y')
         self.calendar.pack(fill = tk.BOTH, expand =True)
         self.select_date_button = Button(self.calendar_window, text ="Select Date", command = self.get_calendar_date)
@@ -348,6 +359,7 @@ class SampleApp(Tk):
     #----------------------------- Helps user select the start date of a particular week for analysis
     def select_week(self):
         self.graph_calendar_window = tk.Toplevel(self.tab_window)
+        self.graph_calendar_window.iconphoto(False,self.calendar_taskbar_image)
         self.graph_calendar = Calendar(self.graph_calendar_window, selectmode="day",year= 2021, month=1, day=1, date_pattern = 'dd/mm/y')
         self.graph_calendar.pack(fill = tk.BOTH, expand =True)
         self.select_week_date_button = Button(self.graph_calendar_window, text ="Select Week Start", command = self.get_graph_calendar_date)
@@ -416,6 +428,18 @@ class SampleApp(Tk):
             self.other_crossed_status.config(text ="Yes")
         else:
             self.other_crossed_status.config(text ="No")
+        self.net_price_for_day = []
+        self.net_value = 0
+        for i in range(len(self.data_value_list[0])):
+            for j in range(len(self.data_value_list)):
+                self.net_value = self.net_value + self.data_value_list[j][i]
+            self.net_price_for_day.append(self.net_value)
+            self.net_value = 0
+        
+        self.average_net_price = sum(self.net_price_for_day)/7
+        self.average_net_price = round(self.average_net_price,2)
+        self.average_expenditure_value.config(text = str(self.average_net_price))
+                
         self.graph_calendar_window.destroy()
 
     # ------------------------------- Extracts the data from CSV file, It uses SQL query to filter required data.
