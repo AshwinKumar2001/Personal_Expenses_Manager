@@ -265,6 +265,10 @@ class SampleApp(Tk):
         self.data_tree.column('#4', stretch=tk.NO, minwidth=0, width=120)
         self.data_tree.pack()
 
+        self.display_dataframe = pd.read_csv('product_details.csv', header=None)
+        self.display_dataframe.columns = ['Product Name', 'Product Category', 'Purchase Date', 'Product Price']
+        self.display_dataframe.to_csv('custom_details.csv', index = False)
+
         with open('custom_details.csv') as readfile:
             self.data_reader = csv.DictReader(readfile, delimiter=',')
             for row in self.data_reader:
@@ -273,6 +277,8 @@ class SampleApp(Tk):
                 self.pdate = row['Purchase Date']
                 self.pprice = row['Product Price']
                 self.data_tree.insert("", 0, values=(self.pname, self.ptype, self.pdate, self.pprice))
+        
+        readfile.close()
 
     #------------------ This will fill in the settings for Settings tab if it exists in CSV file
 
