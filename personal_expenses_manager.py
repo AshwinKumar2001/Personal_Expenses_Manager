@@ -157,8 +157,8 @@ class SampleApp(Tk):
         #-------------------------Product Description Frame (Entry area)-------------------#
 
         #--------------------------Product name entry textbox
-        self.legend_frame = LabelFrame(self.new_product_tab,text='Description')
-        self.legend_frame.grid(columnspan=2,ipadx = 250,ipady = 60)
+        self.legend_frame = LabelFrame(self.new_product_tab,text='General Expense Description')
+        self.legend_frame.grid(columnspan=2,ipadx = 250,ipady = 10)
         self.product_name_label = Label(self.legend_frame,text = "Product Name: ", font = ('Helvetica', 10))
         self.product_name_label.grid(column=0, row=0, ipadx=0, ipady=10)
         self.product_name_text = tk.Text(self.legend_frame,height = 2,width = 60)
@@ -187,7 +187,10 @@ class SampleApp(Tk):
         self.price_of_product_text.grid(column=1, row=3)
         
         self.add_product_button = Button(self.legend_frame, text = "Add", borderwidth=2, bg = "#00ff08",fg = "#ff3700", command=self.add_product)
-        self.add_product_button.grid(column = 1, row=4, ipadx=20,ipady=7)
+        self.add_product_button.grid(column = 1, row=4, ipadx=20,ipady=7, padx= 10, pady = 12)
+
+        self.special_settings_legend_frame = LabelFrame(self.new_product_tab, text = "Special Expense Description" )
+        self.special_settings_legend_frame.grid(row = 1, column = 0, ipadx = 200, ipady = 130, columnspan= 2, sticky= tk.NSEW)
 
         #----------------------------------------------------------------------------------#
 
